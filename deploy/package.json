@@ -1,0 +1,17 @@
+{
+  "name": "deploy",
+  "version": "1.0.0",
+  "description": "Redeploy the entire verified set (`deployed-contracts/`) on a local EVM node for testing/forking without touching Base Sepolia. **Scaffold for now** — the deploy machinery (captured creation artifacts + `deploy.mjs`) comes next. This README is the map of *what talks to what*, so the deploy order and the wiring are obvious.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "circomlibjs": "^0.1.7",
+    "ethers": "^6.17.0"
+  }
+}

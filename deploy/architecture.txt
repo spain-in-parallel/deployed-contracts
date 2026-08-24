@@ -1,0 +1,52 @@
+   OFF-CHAIN  (people + services)                           ON-CHAIN  (Base Sepolia · chainId 84532)
+
+   ── GOVERNANCE ────────────────────────────────────────────────────────────────────────────────────────────────
+   ┌────────────────────────────────┐
+   │ Proposer / Citizen             │  1. pin idea JSON  ──►  IPFS  ──►  CID
+   └────────────────────────────────┘
+
+   ┌────────────────────────────────┐                             ┌─────────────────────────────────────────────┐
+   │ Council-DAO  (web + Safe 2/3)  │  2. submit(cid) · pays fee  │ 09 IdeaRegistry  ·  0xba91…8A5b (plain)     │
+   │ approveHash + execTransaction  │  3. resolve(approve,cfg) ─► │ onlySafe.resolve(approve,cfg)               │
+   └────────────────────────────────┘                             │ guard:  cfg.description == CID              │
+                                                                  └─────────────────────────────────────────────┘
+                                                                    │ 4. createProposal(cfg)
+                                                                    ▼
+                                                                  ┌─────────────────────────────────────────────┐
+                                                                  │ 06 ProposalsState  ·  0xC003…2611 (UUPS)    │
+                                                                  │ createProposal · vote · getProposalInfo     │
+                                                                  │ └─ deploys one ProposalSMT per proposal     │
+                                                                  └─────────────────────────────────────────────┘
+
+   ── CITIZEN APP  +  GATEWAY ───────────────────────────────────────────────────────────────────────────────────
+   ┌────────────────────────────────────────────────────────┐
+   │ CITIZEN APP   (Expo / React Native)                    │
+   │ home:     promotedProposalIds + getProposalInfo        │ ┄►  reads  06 ProposalsState
+   │ verifier: getCode(tx) + getProposalInfo                │
+   │ scan passport / DNI  →  build ZK proofs                │
+   └────────────────────────────────────────────────────────┘
+
+   ┌────────────────────────────────────────────────────────┐
+   │ GATEWAY                                                │
+   │ registrator :  passive-auth + sign                     │
+   │ relayer     :  allow-list + pays gas                   │
+   └────────────────────────────────────────────────────────┘
+
+     5c. registerSimple(...)            6c. execute(TD3) / executeTD1(TD1)
+     ▼                                  ▼
+
+   ── REGISTRATION  +  VOTING ───────────────────────────────────────────────────────────────────────────────────
+   ┌────────────────────────────────┐   ┌──────────────────────────────────────────────────────────────────────┐
+   │ 02 RegistrationSimple (UUPS)   │   │ 07 BioPassportVoting (TD3)      ·      08 IDCardVoting (TD1)         │
+   │ 0x5f5a…A5ad                    │   │ verifier BioPassportVotingVerifier(23) · QueryIdentityTD1Verifier(24)│
+   │ verifies register proof:       │   │ execute() / executeTD1()  ─►  vote()  ─►  ProposalSMT (anti-2×)      │
+   │ 04 RegVerifTD3 · 05 RegVerifTD1│   └──────────────────────────────────────────────────────────────────────┘
+   └────────────────────────────────┘
+
+   ── STATE LAYER ───────────────────────────────────────────────────────────────────────────────────────────────
+   ┌──────────────────────────────────┐             ┌──────────────────────────────────────────┐
+   │ 01 StateKeeper (Mock !)  ·  UUPS │ addBond ─►  │ 03 RegistrationSMT (PoseidonSMT)         │
+   │ 0xC5d3…7DD8                      │             │ 0x8bD3…1f66                              │
+   │ passport ↔ identity bonds        │             └──────────────────────────────────────────┘
+   └──────────────────────────────────┘
+     └─ linked ─►  PoseidonUnit1L / 2L / 3L  (hash libs)  ◄─ linked ─┘
